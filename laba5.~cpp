@@ -1,0 +1,252 @@
+#include <vcl.h>
+#include <stdio.h>
+#include <iostream.h>
+#include <math.h>
+#include <string.h>
+
+struct Stack
+{
+        char info;
+        Stack *next;
+} *top;
+
+string transformStr (string);
+string transform1Str (string);
+void addToStack (char);
+Stack* takeFromStack(Stack*, char*);
+int Priority (Char);
+bool checkOperation (char);
+double processStr (string);
+
+string values[81];
+
+void main ()
+{
+        string primStr,primStr1,finStr;
+        int cod,i;
+        double result;
+        do
+        {
+                system("cls");
+                puts(":::::MENU:::::\n1 - Input primary \n2 - Input values\n3 - Transform primary string\n4 - Find answer\n0 - EXIT");
+                cin>>cod;
+                switch (cod)
+                {
+                        case 1:
+                        {
+                                primStr = ""; finStr = "";
+                                puts("Input primary string:");
+                                cin>>primStr;
+                        }
+                        case 2:
+                        {
+                                int j = -1;
+                                for (i = 0; i < primStr.length(); ++i)
+                                     if (primStr[i] >= 'a' && primStr[i] <= 'z') {
+                                                                                        cout<<primStr[i]<<'=';
+                                                                                        j++;
+                                                                                        cin>>values[j];
+                                                                                 }
+                                primStr1 = transform1Str(primStr);
+                                cout<<primStr1<<endl;
+                                system("pause");
+                                break;
+                        }
+                        case 3:
+                        {
+                                finStr = transformStr(primStr);
+                                cout<<finStr<<endl;
+                                system("pause");
+                                break;
+                        }
+                        case 4:
+                        {
+                                result = processStr(primStr1);
+                                cout<<result<<endl;;
+                                system("pause");
+                                break;
+                        }
+
+                }               
+
+        }
+        while (cod < 5 && cod > 0);
+}
+
+string transformStr (string primStr)
+{
+        int primStrLength,i;
+        char curSym;
+        string finStr;
+        primStrLength = primStr.length();
+        for (i = 0; i <= primStrLength; ++i)
+        {
+                if (primStr[i] == '(') addToStack(primStr[i]);
+                if (primStr[i] == ')')  {
+                                                while (top->info != '(')
+                                                {
+                                                        top = takeFromStack(top,&curSym);
+                                                        finStr += curSym;
+                                                }
+                                                top = takeFromStack(top,&curSym);
+                                        }
+                if (primStr[i] >= 'a' && primStr[i] <= 'z') finStr += primStr[i];
+                if (checkOperation(primStr[i])) {
+                                                        while (top != NULL && Priority(top->info) >= Priority(primStr[i]))
+                                                        {
+                                                                top = takeFromStack(top,&curSym);
+                                                                finStr += curSym;
+                                                        }
+                                                        addToStack(primStr[i]);
+                                                 }
+        }
+        while (top != NULL)
+        {
+                top = takeFromStack(top,&curSym);
+                finStr += curSym;
+        }
+        return finStr;
+}
+
+void addToStack (char info)
+{
+        Stack *cur = new Stack;
+        cur->next = top;
+        cur->info = info;
+        top = cur;
+}
+
+Stack* takeFromStack(Stack* p, char *out)
+{
+        Stack *t = p;
+        *out = p -> info;
+        p = p -> next;
+        delete t;
+        return p;
+}
+
+int Priority (char s)
+{
+        switch (s)
+        {
+                case '^': return 4;
+                case '*': case '/': return 3;
+                case '-': case '+': return 2;
+                case '(': return 1;
+        }
+	return 0;
+}
+
+bool checkOperation (char s)
+{
+        if (s == '+' || s == '-' || s == '*' || s == '/' || s == '^' ) return true;
+        else return false;
+}
+
+string transform1Str (string primStr)
+{
+        string finStr;
+        char operations[81];
+        int i,j = -1, k = -1, length;
+        for (i = 0; i < primStr.length(); ++i)
+        {
+                if (primStr[i] >= 'a' && primStr[i] <= 'z') {
+                                                                ++j;
+                                                                primStr.erase(i,1);
+                                                                primStr.insert(i,values[j]);
+                                                            }
+        }
+        return primStr;
+
+
+
+   /*     for (i = 0; i < primStr.length(); ++i)
+            if (primStr[i] < 'a' || primStr[i] > 'z') {
+                                                                ++j;
+                                                                operations[j] = primStr[i];
+                                                        }
+        for (i = 0; i <= j; ++i)
+        {
+                k++;
+                finStr += values[k];
+                finStr += operations[i];
+                if (operations[i] == ')') {
+                                                ++i;
+                                                finStr += operations[i];
+                                          }
+                if (operations[i+1] == '(') {
+                                                ++i;
+                                                finStr += operations[i];
+                                          }
+        }
+        finStr += values[k+1];
+        return finStr;   */
+}
+
+double processStr(string Str)
+{
+  struct OperStruct
+  {
+          int Prior;
+          char Oper;
+  } OperMas [81];
+  string s1;
+  double Results [81];
+  int j = -1,Priority = 0,i,n = 0;
+  for (i = 0; i < Str.length(); ++i)
+        switch (Str[i])
+        {
+                case '+': case '-': case '*': case '/' :
+                {
+                        ++j;
+                        Results[j] = atof(s1.c_str());
+                        s1 = "";
+                        OperMas[j].Prior = Priority;
+                        if (Str[i] == '+' || Str[i] == '-') OperMas[j].Prior++;
+                        if (Str[i] == '*' || Str[i] == '/') OperMas[j].Prior += 2;
+                        OperMas[j].Oper = Str[i];
+                        break;
+                }
+                case '(' : Priority += 2; break;
+                case ')' : Priority -= 2; break;
+                case '0' :  s1 += Str[i]; break;
+                case '1' :  s1 += Str[i]; break;
+                case '2' :  s1 += Str[i]; break;
+                case '3' :  s1 += Str[i]; break;
+                case '4' :  s1 += Str[i]; break;
+                case '5' :  s1 += Str[i]; break;
+                case '6' :  s1 += Str[i]; break;
+                case '7' :  s1 += Str[i]; break;
+                case '8' :  s1 += Str[i]; break;
+                case '9' :  s1 += Str[i]; break;
+                case '.' :  s1 += Str[i]; break;
+        }
+  Results[j+1] = atof(s1.c_str());
+  while (j > -1)
+        {
+             n = 0;
+             for (i = 0; i <= j; ++i)
+              if (OperMas[i].Prior > OperMas[n].Prior) n = i;
+             switch (OperMas[n].Oper)
+             {
+                     case '+' : Results[n] =Results[n] + Results[n+1]; break;
+                     case '-' : Results[n] =Results[n] - Results[n+1]; break;
+                     case '*' : Results[n] =Results[n] * Results[n+1]; break;
+                     case '/' : Results[n] =Results[n] / Results[n+1]; break;
+             }
+             for (Priority = n; Priority <= j-1; Priority++)
+             {
+                 OperMas[Priority].Prior = OperMas[Priority+1].Prior;
+                 OperMas[Priority].Oper = OperMas[Priority+1].Oper;
+             }
+             for (Priority = n+1; Priority<=j; Priority++)
+             {
+                 Results[Priority] = Results[Priority+1];
+             }
+             j--;
+        }
+  return Results[0];
+}
+
+
+
